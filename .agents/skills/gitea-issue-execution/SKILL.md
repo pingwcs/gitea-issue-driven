@@ -7,11 +7,11 @@ description: Implement the latest marked Gitea design from fetched origin/master
 
 Implement the remote contract with traceable tests and commits.
 
+Before the first remote operation, read the [connector core](../../shared/gitea/connector-core.md) and this phase's read-only [capability contract](references/capability-contract.md).
+
 ## Refresh the contract
 
-Before the first remote operation, read the [shared connector profile](../gitea-connector-profile.md) and this Skill's [capability contract](references/capability-contract.md). The profile maps live tools; the contract makes this phase read-only in Gitea.
-
-1. Re-read the issue and every comment. Use the newest `<!-- gitea-issue-driven:plan:v1 -->` comment; stop if missing, malformed, or superseded by later maintainer direction.
+1. Re-read the issue and every comment. Use the newest `<!-- gitea-issue-driven:plan:v1 -->` comment; stop if it is missing, malformed, or superseded by later maintainer direction.
 2. Run `$gitea-issue-evidence` only for new supported attachments.
 3. Send newly discovered deferred outcomes to `$gitea-issue-triage` for deduplicated follow-ups.
 
@@ -19,27 +19,21 @@ Before the first remote operation, read the [shared connector profile](../gitea-
 
 Read repository guidance; inspect status, branch, remotes, and worktrees. Do not stash, reset, discard, or mix unrelated work.
 
-1. run `git fetch origin master --prune`;
-2. verify `origin/master` exists and record its commit;
-3. create `issue/<number>-<short-slug>` with `git switch -c <branch> origin/master`;
-4. if the branch exists, inspect it instead of overwriting it.
+1. Run `git fetch origin master --prune`.
+2. Verify `origin/master` and record its commit.
+3. Create `issue/<number>-<short-slug>` from `origin/master`; inspect an existing branch instead of overwriting it.
+4. Verify the branch point equals the fetched commit.
 
-Verify the branch point equals fetched `origin/master`.
+## Implement verified units
 
-## Implement module by module
-
-For each numbered module/step:
+For each numbered module or step:
 
 1. For behavior changes, add the smallest regression test and observe the expected failure. If it already passes, prove coverage or revise it.
-2. Implement that unit and its required error/compatibility handling.
-3. Run the focused test and affected subsystem checks.
-4. Review diff/status; remove debug output and unrelated files.
+2. Implement the unit and required error or compatibility handling.
+3. Run focused and affected-subsystem checks.
+4. Review diff/status and remove debug output or unrelated files.
 5. Stage explicit paths, commit the complete unit, and record SHA, tests, outcomes, and acceptance mapping.
 
-Do not commit incomplete or failing checkpoints, amend published commits automatically, or rewrite history. Use the actual issue classification label to scale verification; P0/P1 labels require broader regression checks before push. A label alone does not trigger security review: require credible evidence or changes to authentication, authorization, secrets, cryptography, untrusted-input parsing, or a network trust boundary.
+Do not commit failing checkpoints, automatically amend published commits, or rewrite history. Use actual classification labels to scale verification; P0/P1 requires broader regression checks. Security review requires credible evidence, a changed security boundary, or repository policy.
 
-## Push and hand off
-
-After all modules, run repository-required format, lint, typecheck, unit, and integration checks. Add security checks only under the trigger above or when repository policy requires them. Record exact outcomes and verify the full diff and commit order.
-
-Push with `git push -u origin <branch>`; never force-push. Confirm remote head SHA. Invoke `$gitea-pr-delivery` with the issue URL, branch, acceptance mapping, and compact commit/test ledger; it must read the current plan and diff directly.
+After all units, run repository-required format, lint, typecheck, unit, and integration checks. Verify the full diff and commit order, push with `git push -u origin <branch>`, and confirm the remote head SHA. Invoke `$gitea-pr-delivery` with only the issue URL, branch, acceptance mapping, and compact commit/test ledger.
