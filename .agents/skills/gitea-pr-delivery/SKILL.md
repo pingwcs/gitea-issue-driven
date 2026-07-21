@@ -15,7 +15,7 @@ Re-read the source issue and labels, latest marked plan, `origin/master...HEAD` 
 
 Render [assets/pr-body-template.md](assets/pr-body-template.md). State behavior and implementation once; include only material constraints, risks, and follow-ups. Exclude credentials, private logs, personal data, signed URLs, and exploit detail. Add security content only for credible evidence or a changed security boundary.
 
-Keep classification in actual PR labels. Copy applicable existing source labels by exact ID; do not create or approximate missing labels. Generate 2-4 checklist items from acceptance behavior, changed boundaries, risks, and tests.
+Copy applicable existing source labels to the PR by exact ID while preserving unrelated PR labels. Do not create or approximate missing labels. Generate 2-4 checklist items from acceptance behavior, changed boundaries, risks, and tests.
 
 ## Link close-on-merge
 

@@ -34,6 +34,6 @@ For each numbered module or step:
 4. Review diff/status and remove debug output or unrelated files.
 5. Stage explicit paths, commit the complete unit, and record SHA, tests, outcomes, and acceptance mapping.
 
-Do not commit failing checkpoints, automatically amend published commits, or rewrite history. Use actual classification labels to scale verification; P0/P1 requires broader regression checks. Security review requires credible evidence, a changed security boundary, or repository policy.
+Do not commit failing checkpoints, automatically amend published commits, or rewrite history. Scale verification from demonstrated impact, applicable existing labels, and repository policy. Security review requires credible evidence, a changed security boundary, or repository policy.
 
 After all units, run repository-required format, lint, typecheck, unit, and integration checks. Verify the full diff and commit order, push with `git push -u origin <branch>`, and confirm the remote head SHA. Invoke `$gitea-pr-delivery` with only the issue URL, branch, acceptance mapping, and compact commit/test ledger.

@@ -2,7 +2,7 @@
 
 ## Required reads
 
-- `issue.get`, `issue.comments.list-complete`, and `issue.labels.list` for source state, plan, closure decision, and classification; the bounded comment fallback is permitted.
+- `issue.get`, `issue.comments.list-complete`, and `issue.labels.list` for source state, plan, closure decision, and applicable existing labels; the bounded comment fallback is permitted.
 - `repository.labels.list-complete` for exact existing label IDs.
 - `pull-request.get`, `pull-request.files.list-complete`, `pull-request.diff.get`, and `pull-request.status.get` for current state and verification.
 - Optional `pull-request.list` to find an open PR by head branch. Without it, require a known PR number or another advertised read that rules out duplication.

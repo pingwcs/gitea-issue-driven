@@ -34,7 +34,7 @@ The runtime does not load a fixed tool-name map. Each remote phase inspects the 
 | Skill | Outcome |
 |---|---|
 | `gitea-issue-decomposition` | Independently deliverable child issues plus a reconciled parent tracker |
-| `gitea-issue-triage` | Classification labels, deduplicated follow-ups, and a verified marked plan |
+| `gitea-issue-triage` | Existing repository label reuse, deduplicated follow-ups, and a verified marked plan |
 | `gitea-issue-evidence` | Bounded, redacted screenshot and log evidence |
 | `gitea-issue-execution` | Regression-first implementation, verified commits, and a non-force branch push |
 | `gitea-pr-delivery` | A verified PR with evidence, labels, checklist, and conditional close-on-merge |
