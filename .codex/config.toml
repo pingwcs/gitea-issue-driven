@@ -4,8 +4,3 @@ multi_agent = true
 [agents]
 max_threads = 4
 max_depth = 1
-
-[agents.gitea-issue-driven]
-description = "Drive a Gitea issue from untrusted evidence through a verified, review-ready pull request."
-config_file = "./agents/gitea-issue-driven.toml"
-nickname_candidates = ["Triage", "PatchPilot", "IssueSmith"]
