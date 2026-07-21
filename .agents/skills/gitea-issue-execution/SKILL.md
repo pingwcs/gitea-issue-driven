@@ -1,11 +1,11 @@
 ---
 name: gitea-issue-execution
-description: Implement the latest marked Gitea design from fetched origin/master with regression-first tests, scoped commits, and a non-force push. Use after gitea-issue-triage publishes a plan.
+description: Implement and verify the latest marked Gitea plan in Gitea-native mode without branch creation, commits, pushes, PRs, or OpenSpec task handling. Use after gitea-issue-triage and gitea-branch-bootstrap only when OpenSpec is not the implementation owner.
 ---
 
 # Gitea Issue Execution
 
-Implement the remote contract with traceable tests and commits.
+Implement the remote contract with traceable tests. This Skill is exclusive to `gitea-native` mode; never combine it with `openspec-apply-change` for the same change.
 
 Before the first remote operation, read the [connector core](../../shared/gitea/connector-core.md) and this phase's read-only [capability contract](references/capability-contract.md).
 
@@ -15,14 +15,9 @@ Before the first remote operation, read the [connector core](../../shared/gitea/
 2. Run `$gitea-issue-evidence` only for new supported attachments.
 3. Send newly discovered deferred outcomes to `$gitea-issue-triage` for deduplicated follow-ups.
 
-## Start from current remote master
+## Verify the prepared branch
 
-Read repository guidance; inspect status, branch, remotes, and worktrees. Do not stash, reset, discard, or mix unrelated work.
-
-1. Run `git fetch origin master --prune`.
-2. Verify `origin/master` and record its commit.
-3. Create `issue/<number>-<short-slug>` from `origin/master`; inspect an existing branch instead of overwriting it.
-4. Verify the branch point equals the fetched commit.
+Require the verified output of `$gitea-branch-bootstrap`. Confirm the current branch and base SHA still match it. Do not create, switch, rewrite, or publish branches. Preserve unrelated work and stop if it prevents a scoped implementation.
 
 ## Implement verified units
 
@@ -32,8 +27,8 @@ For each numbered module or step:
 2. Implement the unit and required error or compatibility handling.
 3. Run focused and affected-subsystem checks.
 4. Review diff/status and remove debug output or unrelated files.
-5. Stage explicit paths, commit the complete unit, and record SHA, tests, outcomes, and acceptance mapping.
+5. Review the scoped diff and record changed paths, tests, outcomes, and acceptance mapping.
 
-Do not commit failing checkpoints, automatically amend published commits, or rewrite history. Scale verification from demonstrated impact, applicable existing labels, and repository policy. Security review requires credible evidence, a changed security boundary, or repository policy.
+Do not stage, commit, push, or rewrite history. Scale verification from demonstrated impact, applicable existing labels, and repository policy. Security review requires credible evidence, a changed security boundary, or repository policy.
 
-After all units, run repository-required format, lint, typecheck, unit, and integration checks. Verify the full diff and commit order, push with `git push -u origin <branch>`, and confirm the remote head SHA. Invoke `$gitea-pr-delivery` with only the issue URL, branch, acceptance mapping, and compact commit/test ledger.
+After all units, run the checks required by repository policy and the caller's verification contract. Verify the full scoped diff, then invoke `$gitea-change-publish` with the issue URL, branch/base, acceptance mapping, changed paths, and compact test ledger.

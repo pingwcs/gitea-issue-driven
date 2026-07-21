@@ -1,5 +1,6 @@
 <!-- gitea-issue-driven:pr-body:v1 -->
 Source: <issue URL>
+Workflow: <`OpenSpec <change> @ <artifact-fingerprint>` or `Gitea-native plan <comment-id>`>
 
 ## Issue closure on merge
 
@@ -21,5 +22,5 @@ Source: <issue URL>
 <!-- gitea-issue-driven:review-checklist:start -->
 ## Review Checklist
 
-- [ ] <2-4 change-specific behavior, boundary, risk, or test checks>
+- [ ] **<AC-id>** — <2-4 change-specific behavior, boundary, risk, or test checks>
 <!-- gitea-issue-driven:review-checklist:end -->

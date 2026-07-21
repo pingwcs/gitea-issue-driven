@@ -12,9 +12,12 @@ from typing import NamedTuple, Sequence
 
 
 SKILL_NAMES = (
+    "gitea-branch-bootstrap",
+    "gitea-change-publish",
     "gitea-issue-decomposition",
     "gitea-issue-evidence",
     "gitea-issue-execution",
+    "gitea-issue-intake",
     "gitea-issue-triage",
     "gitea-pr-delivery",
 )

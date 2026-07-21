@@ -10,11 +10,11 @@
 
 ## Acceptance
 
-- [ ] <testable criterion>
+- [ ] **AC-1** — <testable criterion>
 
 ## Design and delivery
 
-1. **<module>** (`<boundaries/files>`) — <change and key flow/API>; test: <focused test>; commit: `<subject>`
+1. **<module>** (`<boundaries/files>`) — <change and key flow/API>; acceptance: <AC-ids>; test: <focused test>
 
 ## Verification
 

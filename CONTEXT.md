@@ -12,6 +12,14 @@ _Avoid_: Internal layout, Skill directory structure
 An authority-bounded unit of work that produces one verifiable outcome and refreshes the remote evidence it needs. Decomposition, planning, execution, and pull-request delivery are distinct phases.
 _Avoid_: Step, mode
 
+**Workflow mode**:
+The mutually exclusive owner selection for planning and implementation. `openspec` delegates both to OpenSpec; `gitea-native` uses the marked Gitea plan and execution Skill. Intake, branch transport, and PR delivery are shared.
+_Avoid_: Mixing planning or implementation owners
+
+**Acceptance ID**:
+A stable source-order identifier such as `AC-1` that maps one acceptance criterion across issue evidence, specification, implementation, verification, commits, and PR review.
+_Avoid_: Repeated unkeyed acceptance prose
+
 **Phase authority**:
 The exact remote reads and writes permitted while a workflow phase is active. A phase cannot inherit mutations owned by another phase.
 _Avoid_: Tool access, general permission

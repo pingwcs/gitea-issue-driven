@@ -18,7 +18,7 @@ Before the first remote operation, read the [connector core](../../shared/gitea/
    `<!-- gitea-issue-driven:child parent=<parent-number> key=<stable-key> -->`
 
 4. Classify each proposal as `existing`, `create`, or `merge-with-existing`; preserve issue numbers and order by dependency. Redraw cyclic boundaries.
-5. Render [assets/child-issue-template.md](assets/child-issue-template.md). Include only child-specific constraints and relevant existing labels. Create and read back each missing child before continuing; stop on failure without deleting completed writes.
+5. Render [assets/child-issue-template.md](assets/child-issue-template.md). Give each child its own stable source-order `AC-*` IDs and retain parent acceptance references where applicable. Include only child-specific constraints and relevant existing labels. Create and read back each missing child before continuing; stop on failure without deleting completed writes.
 6. Re-read the parent. Build `children.json` from verified child numbers, titles, URLs, responsibilities, dependencies, and states, then run:
 
    `python scripts/reconcile_parent.py --parent-body <latest-body-file> --children-json <children-json> --output <updated-body-file>`

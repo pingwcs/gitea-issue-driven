@@ -1,4 +1,4 @@
 interface:
   display_name: "Gitea Issue Execution"
-  short_description: "Implement a marked Gitea issue plan"
-  default_prompt: "Use $gitea-issue-execution to implement the latest marked plan from origin/master and push verified commits."
+  short_description: "Implement a Gitea-native marked plan"
+  default_prompt: "Use $gitea-issue-execution in Gitea-native mode to implement and verify the latest marked plan without committing or pushing."

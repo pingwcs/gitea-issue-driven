@@ -2,7 +2,7 @@
 
 ## Agreed constraints
 
-- Install the five public Gitea Skills, the shared runtime, and the agent configuration without modifying global MCP configuration.
+- Install the eight public Gitea Skills, the shared runtime, and the agent configuration without modifying global MCP configuration.
 - Require explicit `--force` before replacing managed targets or migrating the legacy connector profile.
 - Keep `--dry-run` free of filesystem writes.
 - Roll back overwritten and migrated managed artifacts after a failed commit.
@@ -21,10 +21,10 @@ Verified on 2026-07-22 with one inline Python harness using only automatically c
 | Behavior | Result |
 |---|---|
 | Installer source parses and the agent TOML loads | PASS |
-| Fresh install creates exactly five Skill directories, `shared/gitea`, and the agent config | PASS |
+| Fresh install creates exactly eight Skill directories, `shared/gitea`, and the agent config | PASS |
 | Fresh install excludes the legacy profile and does not create `config.toml` | PASS |
 | A legacy profile blocks installation without `--force` and remains unchanged | PASS |
 | `--force` removes only the known legacy profile and installs the shared runtime | PASS |
 | An injected mid-commit failure restores the legacy profile and removes partial new targets | PASS |
 
-An additional read-only inline check verified all local Markdown links, all five public Skill names, the five stable marker families, a 330-token approximate stable-entry budget, and approximate remote-phase hot paths between 1,363 and 1,546 tokens. No persistent test file or test artifact was added to the project.
+On 2026-07-22, all eight Skill directories passed `skill-creator/scripts/quick_validate.py`. A temporary-home install created eight Skills plus the shared runtime and agent config; a repeated install failed with the expected conflict exit code, and the installed agent TOML parsed successfully. The temporary home was removed after verification.

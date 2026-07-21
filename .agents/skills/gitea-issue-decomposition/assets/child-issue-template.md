@@ -9,8 +9,9 @@
 
 ## Acceptance
 
-- [ ] <independently testable criterion>
+- [ ] **AC-1** — <independently testable criterion>
 
+- Parent acceptance: <parent AC-ids or None>
 - Depends on: <child links or None>
 - Constraints: <material constraints; omit if none>
 - Test: <focused command or observable evidence>

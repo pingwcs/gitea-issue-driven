@@ -1,11 +1,11 @@
 ---
 name: gitea-issue-triage
-description: Reuse existing repository labels for a Gitea issue, create deduplicated follow-ups, and publish a concise marked implementation plan. Use for issue analysis, planning, or design-before-code.
+description: Reuse existing repository labels, create deduplicated follow-ups, and publish a concise marked implementation plan in Gitea-native mode. Never use when OpenSpec owns planning for the change.
 ---
 
 # Gitea Issue Triage
 
-Persist a concise implementation contract before code changes.
+Persist a concise implementation contract before code changes. This Skill is exclusive to `gitea-native` mode; in `openspec` mode use `$gitea-issue-intake` and keep planning solely in OpenSpec artifacts.
 
 Before the first remote operation, read the [connector core](../../shared/gitea/connector-core.md) and this phase's [capability contract](references/capability-contract.md).
 
@@ -27,4 +27,4 @@ Extract independently actionable deferred outcomes while retaining compatibility
 
 Render [assets/plan-comment-template.md](assets/plan-comment-template.md). Use one compact bullet per concern and omit empty optional content. Add security constraints only for credible evidence or changes to a security boundary.
 
-Create one marked comment or edit the latest one. Read back comments and labels; verify the marker, acceptance criteria, modules, tests, follow-up links, preservation of existing labels, and the selected repository label when one was added. Return the comment ID, selected label if any, and follow-up numbers.
+Create one marked comment or edit the latest one. Preserve the intake acceptance IDs in criteria, modules, and tests; give independently deliverable follow-up issues their own stable IDs. Read back comments and labels; verify the marker, mappings, preservation of existing labels, and the selected repository label when one was added. Return the comment ID, selected label if any, and follow-up numbers.

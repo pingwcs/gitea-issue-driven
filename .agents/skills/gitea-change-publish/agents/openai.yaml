@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gitea Change Publish"
+  short_description: "Commit and safely push verified changes"
+  default_prompt: "Use $gitea-change-publish to commit the verified scoped diff and non-force push its issue branch."
