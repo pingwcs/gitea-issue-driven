@@ -1,5 +1,4 @@
 <!-- gitea-issue-driven:plan:v1 -->
-- **Priority:** <P0-P3> · <label action>
 - **Evidence:** <observed facts>
 - **Diagnosis:** <bounded inference; add unknowns only when material>
 

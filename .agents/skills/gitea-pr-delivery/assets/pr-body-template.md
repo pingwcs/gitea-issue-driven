@@ -1,5 +1,5 @@
 <!-- gitea-issue-driven:pr-body:v1 -->
-Source: <issue URL> · Priority: <P0-P3>
+Source: <issue URL>
 
 ## Issue closure on merge
 
@@ -16,9 +16,7 @@ Source: <issue URL> · Priority: <P0-P3>
 
 ## Notes
 
-- Constraints/non-goals: <material items or None>
-- Risks/rollback: <material items or None>
-- Follow-ups: <links or None>
+- <material constraint, risk/rollback, or follow-up; omit section if none>
 
 <!-- gitea-issue-driven:review-checklist:start -->
 ## Review Checklist

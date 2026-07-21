@@ -13,6 +13,8 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
+TRIAGE_SKILL = ROOT / '.agents' / 'skills' / 'gitea-issue-triage' / 'SKILL.md'
+TRIAGE_TEMPLATE = ROOT / '.agents' / 'skills' / 'gitea-issue-triage' / 'assets' / 'plan-comment-template.md'
 
 
 def load_module(name: str, path: Path):
@@ -115,7 +117,32 @@ class EvidenceSafetyTests(unittest.TestCase):
         self.assertNotIn("qwerty", safe)
 
 
-class PriorityTests(unittest.TestCase):
+class ClassificationLabelTests(unittest.TestCase):
+    def run_priority(self, *labels: str) -> dict[str, object]:
+        script = ROOT / '.agents' / 'skills' / 'gitea-issue-triage' / 'scripts' / 'prioritize_issue.py'
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'priority.json'
+            completed = subprocess.run(
+                [sys.executable, str(script), '--labels', *labels, '--output', str(output)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            return json.loads(output.read_text(encoding='utf-8'))
+
+    def test_canonical_label_prefix_is_recognized(self):
+        self.assertEqual('P1', self.run_priority('P1-high')['baseline_priority'])
+
+    def test_empty_label_set_uses_default(self):
+        self.assertEqual('P3', self.run_priority()['baseline_priority'])
+
+    def test_plan_uses_issue_labels_not_a_priority_field(self):
+        template = TRIAGE_TEMPLATE.read_text(encoding='utf-8')
+        skill = TRIAGE_SKILL.read_text(encoding='utf-8')
+        self.assertNotIn('Priority:', template)
+        self.assertIn('actual issue label', skill)
+
     def test_security_label_wins_over_bug(self):
         script = ROOT / ".agents" / "skills" / "gitea-issue-triage" / "scripts" / "prioritize_issue.py"
         with tempfile.TemporaryDirectory() as directory:

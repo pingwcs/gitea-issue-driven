@@ -10,6 +10,14 @@ TEMPLATE = ROOT / ".agents" / "skills" / "gitea-pr-delivery" / "assets" / "pr-bo
 
 
 class CloseOnMergeRuleTests(unittest.TestCase):
+    def test_classification_uses_pr_labels_not_body_priority(self):
+        template = TEMPLATE.read_text(encoding='utf-8')
+        skill = SKILL.read_text(encoding='utf-8')
+        self.assertNotIn('Priority:', template)
+        self.assertIn('actual PR labels', skill)
+        contract = (SKILL.parent / 'references' / 'capability-contract.md').read_text(encoding='utf-8')
+        self.assertIn('issue_number=<pull_number>', contract)
+
     def test_template_requires_a_conditional_close_reference(self):
         template = TEMPLATE.read_text(encoding="utf-8")
         self.assertIn("## Issue closure on merge", template)

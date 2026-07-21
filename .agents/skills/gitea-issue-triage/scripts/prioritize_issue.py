@@ -16,7 +16,7 @@ DEFAULT_POLICY = Path(__file__).resolve().parent.parent / "references" / "priori
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--labels", nargs="+", required=True)
+    parser.add_argument("--labels", nargs="*", required=True)
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
     parser.add_argument("--output", required=True, type=Path)
     return parser.parse_args()
@@ -28,7 +28,7 @@ def normalize(value: str) -> str:
 
 def tokens(value: str) -> set[str]:
     normalized = normalize(value)
-    return {normalized, *(part for part in re.split(r"::|[/ :]", normalized) if part)}
+    return {normalized, *(part for part in re.split(r"::|[/ :_-]", normalized) if part)}
 
 
 def main() -> int:

@@ -7,6 +7,8 @@ description: Collect and inspect Gitea screenshots and .log/.txt/.out/.trace att
 
 Return bounded, redacted attachment evidence. Never accept token arguments or token environment variables.
 
+This Skill does not use the shared Gitea connector profile or authorize MCP operations. It consumes normalized issue/comment JSON from the calling phase and uses only the bounded local Tea credential and attachment flow below.
+
 ## Collect attachments
 
 1. Save normalized issue and comment JSON to temporary files; exclude tokens and transport metadata.

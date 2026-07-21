@@ -1,6 +1,6 @@
 ---
 name: gitea-issue-decomposition
-description: Decompose a Gitea issue into independently deliverable child issues through pingwcs/gitea-mcp and reconcile its parent tracking block. Use for 拆分 Issue, sub-issues, epic/tracker conversion, or mixed responsibilities.
+description: Decompose a Gitea issue into independently deliverable child issues through a compatible live Gitea connector and reconcile its parent tracking block. Use for 拆分 Issue, sub-issues, epic/tracker conversion, or mixed responsibilities.
 ---
 
 # Gitea Issue Decomposition
@@ -9,7 +9,7 @@ Create or reuse focused child issues, then update only the parent's managed trac
 
 ## Workflow
 
-Read [references/mcp-contract.md](references/mcp-contract.md) before the first MCP call.
+Before the first remote operation, read the [shared connector profile](../gitea-connector-profile.md) and this Skill's [capability contract](references/capability-contract.md). The profile maps live tools; the contract limits this phase's authority.
 
 1. Read the target, all comments, labels, latest marked plan, existing tracking block, and linked issues. Prove comment completeness; stop if the target is closed or not writable.
 2. Split only outcomes that can each be implemented, tested, reviewed, and accepted. Each child owns one cohesive outcome, boundaries, criteria, an independent test/PR path, and acyclic dependencies. Keep coupled criteria together; never split by file, layer, or implementation step.

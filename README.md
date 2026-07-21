@@ -7,12 +7,12 @@ This Codex agent package implements an Issue-driven development workflow for Git
 | Skill | Responsibility | Main integration |
 |---|---|---|
 | `gitea-issue-decomposition` | Split a target into focused child issues and update the parent tracker | `issue_read`, `list_issues`, `issue_write` |
-| `gitea-issue-triage` | Read issue/comments, assign P0-P3, split future work, publish code design | `issue_read`, `issue_write`, `label_read` |
+| `gitea-issue-triage` | Read issue/comments, apply classification labels, split future work, publish code design | `issue_read`, `issue_write`, `label_read` |
 | `gitea-issue-evidence` | Download screenshots/logs with local Tea credentials and analyze them | `tea login helper get` plus local scripts/vision |
 | `gitea-issue-execution` | Branch from fresh `origin/master`, TDD, verify and commit each step, push | Git and repository test tools |
-| `gitea-pr-delivery` | Create/update and verify a PR with accurate description/checklist | `pull_request_write`, `pull_request_read` |
+| `gitea-pr-delivery` | Create/update and verify a PR with labels and concise evidence | `pull_request_*`, `issue_*`, `label_read` |
 
-The previous seven overlapping Skills were consolidated into four lifecycle Skills, with decomposition kept as a separate optional fifth Skill because it changes Issue topology. Detailed MCP method tables live in references and are loaded only by the phase that needs them.
+The previous seven overlapping Skills were consolidated into four lifecycle Skills, with decomposition kept as a separate optional fifth Skill because it changes Issue topology. Connector discovery, schema mapping, pagination, and credential rules live once in the shared Gitea connector profile. Each remote phase has a smaller capability contract containing only its allowed operations, prohibited mutations, fallbacks, and read-back checks. The evidence Skill stays outside that MCP boundary.
 
 ## Required setup
 
@@ -45,7 +45,7 @@ Before collection, the Skill runs `--credential-check-only` in the sandbox. A fi
 ## Workflow entry points
 
 - “把 Gitea issue `<URL>` 拆成职责清晰的小 Issue” runs decomposition: full read → boundary design → deduplication → child creation → parent tracking-block update.
-- “分析 Gitea issue `<URL>` 并写入解决方案” runs Phase A: full read → attachment evidence → priority mark → future issues → modular design comment.
+- “分析 Gitea issue `<URL>` 并写入解决方案” runs Phase A: full read → attachment evidence → issue labels → future issues → modular design comment.
 - “按已评论的方案解决 Gitea issue `<URL>` 并创建 PR” runs Phase B: re-read → fetch `origin/master` → issue branch → failing test → step commits → push → verified PR.
 
 When a PR fully resolves its open same-repository source Issue, delivery adds `Closes #<issue-number>` to the PR description. Gitea then closes the Issue only when an authorized user merges the PR; trackers, follow-ups, and partial work are never marked for automatic closure.

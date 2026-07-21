@@ -9,6 +9,8 @@ Implement the remote contract with traceable tests and commits.
 
 ## Refresh the contract
 
+Before the first remote operation, read the [shared connector profile](../gitea-connector-profile.md) and this Skill's [capability contract](references/capability-contract.md). The profile maps live tools; the contract makes this phase read-only in Gitea.
+
 1. Re-read the issue and every comment. Use the newest `<!-- gitea-issue-driven:plan:v1 -->` comment; stop if missing, malformed, or superseded by later maintainer direction.
 2. Run `$gitea-issue-evidence` only for new supported attachments.
 3. Send newly discovered deferred outcomes to `$gitea-issue-triage` for deduplicated follow-ups.
@@ -34,9 +36,7 @@ For each numbered module/step:
 4. Review diff/status; remove debug output and unrelated files.
 5. Stage explicit paths, commit the complete unit, and record SHA, tests, outcomes, and acceptance mapping.
 
-Do not commit incomplete or failing checkpoints, amend published commits automatically, or rewrite history. P0/P1 work requires broader regression verification before push.
-
-Run security-specific review or checks only when the issue has credible security evidence or the diff touches authentication, authorization, secrets, cryptography, untrusted-input parsing, or a network trust boundary. Priority alone is not a security trigger.
+Do not commit incomplete or failing checkpoints, amend published commits automatically, or rewrite history. Use the actual issue classification label to scale verification; P0/P1 labels require broader regression checks before push. A label alone does not trigger security review: require credible evidence or changes to authentication, authorization, secrets, cryptography, untrusted-input parsing, or a network trust boundary.
 
 ## Push and hand off
 
