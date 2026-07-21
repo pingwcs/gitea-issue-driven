@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gitea Issue Decomposition"
+  short_description: "Split issues into deliverable child issues"
+  default_prompt: "Use $gitea-issue-decomposition to split this Gitea issue and refresh its parent tracker."

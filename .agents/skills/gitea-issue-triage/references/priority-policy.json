@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "default_priority": "P3",
+  "priority_order": ["P0", "P1", "P2", "P3"],
+  "priorities": {
+    "P0": {"strategy": "Contain impact, identify rollback, and verify the fix.", "required_actions": ["Confirm impact and containment", "Identify owner and rollback", "Run focused and broad verification; add security checks only for security-sensitive evidence or changes"]},
+    "P1": {"strategy": "Protect the affected core workflow and prioritize a tested fix in the current delivery window.", "required_actions": ["Confirm production workflow impact", "Add a regression test", "Run affected subsystem verification"]},
+    "P2": {"strategy": "Implement a scoped fix with reproducible evidence and focused regression coverage.", "required_actions": ["Document expected versus actual behavior", "Add a focused regression test", "Verify the affected workflow"]},
+    "P3": {"strategy": "Gather missing evidence and schedule according to normal backlog policy.", "required_actions": ["Clarify acceptance criteria", "Record missing reproduction evidence"]}
+  },
+  "label_rules": {
+    "p0": {"priority": "P0"},
+    "critical": {"priority": "P0"},
+    "blocker": {"priority": "P0"},
+    "security": {"priority": "P0"},
+    "p1": {"priority": "P1"},
+    "high": {"priority": "P1"},
+    "production": {"priority": "P1"},
+    "regression": {"priority": "P1"},
+    "p2": {"priority": "P2"},
+    "medium": {"priority": "P2"},
+    "bug": {"priority": "P2"},
+    "p3": {"priority": "P3"},
+    "low": {"priority": "P3"}
+  }
+}
