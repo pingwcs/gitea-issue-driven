@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the Gitea issue-driven skills and agent into a Codex home."""
+"""Install every valid Skill from a specified directory into a Codex home."""
 
 from __future__ import annotations
 
@@ -11,28 +11,13 @@ from pathlib import Path
 from typing import NamedTuple, Sequence
 
 
-SKILL_NAMES = (
-    "gitea-branch-bootstrap",
-    "gitea-change-publish",
-    "gitea-issue-decomposition",
-    "gitea-issue-evidence",
-    "gitea-issue-execution",
-    "gitea-issue-intake",
-    "gitea-issue-triage",
-    "gitea-pr-delivery",
-)
-SHARED_RUNTIME = Path("gitea")
-AGENT_NAME = "gitea-issue-driven.toml"
-LEGACY_DESTINATIONS = (Path("skills") / "gitea-connector-profile.md",)
-
-
 class InstallError(RuntimeError):
-    """Raised when the installation cannot be completed safely."""
+    """Raised when the Skill installation cannot complete safely."""
 
 
 class InstallItem(NamedTuple):
     source: Path
-    relative_destination: Path
+    destination: Path
 
 
 def _path_exists(path: Path) -> bool:
@@ -46,106 +31,38 @@ def _remove_path(path: Path) -> None:
         shutil.rmtree(path)
 
 
-def _move_path(source: Path, destination: Path) -> None:
-    source.replace(destination)
+def _validate_source(skill: Path) -> None:
+    if skill.is_symlink():
+        raise InstallError(f"Skill source must not be a symlink: {skill}")
+    for path in skill.rglob("*"):
+        if path.is_symlink():
+            raise InstallError(f"Skill source contains a symlink: {path}")
 
 
-def _build_items(source_root: Path) -> tuple[InstallItem, ...]:
-    skills_root = source_root / ".agents" / "skills"
-    items = tuple(
-        InstallItem(skills_root / name, Path("skills") / name)
-        for name in SKILL_NAMES
-    ) + (
-        InstallItem(
-            source_root / ".agents" / "shared" / SHARED_RUNTIME,
-            Path("shared") / SHARED_RUNTIME,
-        ),
-        InstallItem(
-            source_root / ".codex" / "agents" / AGENT_NAME,
-            Path("agents") / AGENT_NAME,
-        ),
-    )
-    missing = [str(item.source) for item in items if not _path_exists(item.source)]
-    if missing:
-        formatted = "\n  - ".join(missing)
-        raise InstallError(f"installation source is incomplete:\n  - {formatted}")
-    return items
+def _build_items(skills_source: Path, codex_home: Path) -> tuple[InstallItem, ...]:
+    skills_source = skills_source.expanduser().resolve()
+    if not skills_source.is_dir():
+        raise InstallError(f"skills source is not a directory: {skills_source}")
+
+    items: list[InstallItem] = []
+    for candidate in sorted(skills_source.iterdir(), key=lambda path: path.name.casefold()):
+        if not candidate.is_dir() or not (candidate / "SKILL.md").is_file():
+            continue
+        _validate_source(candidate)
+        items.append(InstallItem(candidate, codex_home / "skills" / candidate.name))
+
+    if not items:
+        raise InstallError(f"no child directories containing SKILL.md: {skills_source}")
+    return tuple(items)
 
 
-def _legacy_targets(codex_home: Path) -> tuple[Path, ...]:
-    return tuple(
-        codex_home / relative
-        for relative in LEGACY_DESTINATIONS
-        if _path_exists(codex_home / relative)
-    )
-
-
-def _conflicts(
-    items: Sequence[InstallItem], codex_home: Path, legacy_targets: Sequence[Path]
-) -> list[Path]:
-    current = [
-        codex_home / item.relative_destination
-        for item in items
-        if _path_exists(codex_home / item.relative_destination)
-    ]
-    return current + list(legacy_targets)
-
-
-def _format_plan(
-    items: Sequence[InstallItem],
-    codex_home: Path,
-    legacy_targets: Sequence[Path],
-    *,
-    force: bool,
-    dry_run: bool,
-) -> str:
+def _format_plan(items: Sequence[InstallItem], *, dry_run: bool) -> str:
     heading = "DRY RUN - no files will be changed" if dry_run else "Installation plan"
     lines = [heading]
     for item in items:
-        destination = codex_home / item.relative_destination
-        action = "OVERWRITE" if _path_exists(destination) and force else "CREATE"
-        lines.append(f"  {action}: {destination}")
-    for destination in legacy_targets:
-        lines.append(f"  REMOVE LEGACY: {destination}")
+        action = "OVERWRITE" if _path_exists(item.destination) else "CREATE"
+        lines.append(f"  {action}: {item.destination}")
     return "\n".join(lines)
-
-
-def _copy_to_payload(items: Sequence[InstallItem], payload_root: Path) -> None:
-    for item in items:
-        staged = payload_root / item.relative_destination
-        staged.parent.mkdir(parents=True, exist_ok=True)
-        if item.source.is_dir():
-            shutil.copytree(
-                item.source,
-                staged,
-                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
-            )
-        else:
-            shutil.copy2(item.source, staged)
-
-
-def _ensure_directory(path: Path, created_directories: list[Path]) -> None:
-    missing: list[Path] = []
-    cursor = path
-    while not _path_exists(cursor):
-        missing.append(cursor)
-        if cursor.parent == cursor:
-            break
-        cursor = cursor.parent
-    path.mkdir(parents=True, exist_ok=True)
-    created_directories.extend(reversed(missing))
-
-
-def _remove_created_directories(created_directories: Sequence[Path]) -> list[str]:
-    errors: list[str] = []
-    for path in reversed(created_directories):
-        try:
-            path.rmdir()
-        except FileNotFoundError:
-            pass
-        except OSError as error:
-            errors.append(f"remove directory {path}: {error}")
-    return errors
 
 
 def _rollback(
@@ -160,99 +77,59 @@ def _rollback(
     for destination, backup in reversed(backups):
         try:
             destination.parent.mkdir(parents=True, exist_ok=True)
-            _move_path(backup, destination)
+            backup.replace(destination)
         except OSError as error:
             errors.append(f"restore {destination}: {error}")
     return errors
 
 
-def _backup_path(
-    destination: Path,
-    relative_backup: Path,
-    backup_root: Path,
-    backups: list[tuple[Path, Path]],
-) -> None:
-    backup = backup_root / relative_backup
-    backup.parent.mkdir(parents=True, exist_ok=True)
-    _move_path(destination, backup)
-    backups.append((destination, backup))
-
-
 def install(
-    source_root: Path, codex_home: Path, *, force: bool = False, dry_run: bool = False
+    skills_source: Path,
+    codex_home: Path,
+    *,
+    dry_run: bool = False,
 ) -> tuple[Path, ...]:
-    """Install all package items and transactionally migrate managed legacy files."""
-    source_root = source_root.resolve()
+    """Transactionally install direct child Skill directories."""
     codex_home = codex_home.expanduser().resolve()
-    items = _build_items(source_root)
-    legacy_targets = _legacy_targets(codex_home)
-    conflicts = _conflicts(items, codex_home, legacy_targets)
-    if conflicts and not force:
-        formatted = "\n  - ".join(str(path) for path in conflicts)
-        raise InstallError(
-            "installation conflicts with existing managed targets:\n"
-            f"  - {formatted}\n"
-            "Review the targets, then retry explicitly with --force to replace or migrate them."
-        )
-
-    print(
-        _format_plan(
-            items,
-            codex_home,
-            legacy_targets,
-            force=force,
-            dry_run=dry_run,
-        )
-    )
+    items = _build_items(skills_source, codex_home)
+    print(_format_plan(items, dry_run=dry_run))
+    destinations = tuple(item.destination for item in items)
     if dry_run:
-        return tuple(codex_home / item.relative_destination for item in items)
+        return destinations
 
+    codex_home.parent.mkdir(parents=True, exist_ok=True)
+    transaction = tempfile.TemporaryDirectory(
+        prefix=".codex-skill-install-", dir=codex_home.parent
+    )
+    transaction_root = Path(transaction.name)
+    payload_root = transaction_root / "payload"
+    backup_root = transaction_root / "backup"
     installed: list[Path] = []
     backups: list[tuple[Path, Path]] = []
-    created_directories: list[Path] = []
-    transaction: tempfile.TemporaryDirectory[str] | None = None
-    try:
-        _ensure_directory(codex_home.parent, created_directories)
-        transaction = tempfile.TemporaryDirectory(
-            prefix=".gitea-issue-driven-install-", dir=codex_home.parent
-        )
-        transaction_root = Path(transaction.name)
-        payload_root = transaction_root / "payload"
-        backup_root = transaction_root / "backup"
-        _copy_to_payload(items, payload_root)
 
-        for destination in legacy_targets:
-            relative = destination.relative_to(codex_home)
-            _backup_path(
-                destination,
-                Path("legacy") / relative,
-                backup_root,
-                backups,
+    try:
+        for item in items:
+            staged = payload_root / item.source.name
+            shutil.copytree(
+                item.source,
+                staged,
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
             )
 
+        (codex_home / "skills").mkdir(parents=True, exist_ok=True)
         for item in items:
-            staged = payload_root / item.relative_destination
-            destination = codex_home / item.relative_destination
-            _ensure_directory(destination.parent, created_directories)
+            staged = payload_root / item.source.name
+            destination = item.destination
             if _path_exists(destination):
-                if not force:
-                    raise InstallError(
-                        f"target appeared during installation: {destination}; "
-                        "retry explicitly with --force if it may be overwritten"
-                    )
-                _backup_path(
-                    destination,
-                    Path("current") / item.relative_destination,
-                    backup_root,
-                    backups,
-                )
-            _move_path(staged, destination)
+                backup = backup_root / item.source.name
+                backup.parent.mkdir(parents=True, exist_ok=True)
+                destination.replace(backup)
+                backups.append((destination, backup))
+            staged.replace(destination)
             installed.append(destination)
     except Exception as error:
         rollback_errors = _rollback(installed, backups)
-        if transaction is not None:
-            transaction.cleanup()
-        rollback_errors.extend(_remove_created_directories(created_directories))
+        transaction.cleanup()
         if rollback_errors:
             details = "; ".join(rollback_errors)
             raise InstallError(
@@ -260,17 +137,20 @@ def install(
             ) from error
         raise InstallError(f"installation failed ({error}); changes were rolled back") from error
     else:
-        assert transaction is not None
         transaction.cleanup()
 
-    destinations = tuple(codex_home / item.relative_destination for item in items)
-    print(f"Installed {len(destinations)} items into {codex_home}")
+    print(f"Installed {len(destinations)} Skills into {codex_home / 'skills'}")
     return destinations
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Install the Gitea issue-driven Codex skills and agent."
+        description="Install direct child Skill directories into a Codex home."
+    )
+    parser.add_argument(
+        "skills_source",
+        type=Path,
+        help="directory whose direct child Skill folders contain SKILL.md",
     )
     parser.add_argument(
         "--codex-home",
@@ -279,26 +159,17 @@ def _parser() -> argparse.ArgumentParser:
         help="Codex home directory (default: ~/.codex)",
     )
     parser.add_argument(
-        "--force",
+        "--dry-run",
         action="store_true",
-        help="replace managed targets and migrate the legacy connector profile",
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="show the installation plan without writing"
+        help="show create/overwrite actions without changing files",
     )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    source_root = Path(__file__).resolve().parents[1]
     try:
-        install(
-            source_root,
-            args.codex_home,
-            force=args.force,
-            dry_run=args.dry_run,
-        )
+        install(args.skills_source, args.codex_home, dry_run=args.dry_run)
     except InstallError as error:
         print(f"error: {error}", file=sys.stderr)
         return 2

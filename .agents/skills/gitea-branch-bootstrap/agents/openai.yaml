@@ -1,4 +1,0 @@
-interface:
-  display_name: "Gitea Branch Bootstrap"
-  short_description: "Prepare a safe issue branch from master"
-  default_prompt: "Use $gitea-branch-bootstrap to prepare a verified issue branch from origin/master without changing code."

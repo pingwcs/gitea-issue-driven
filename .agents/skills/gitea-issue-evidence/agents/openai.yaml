@@ -1,4 +1,0 @@
-interface:
-  display_name: "Gitea Issue Evidence"
-  short_description: "Inspect Gitea screenshots and logs"
-  default_prompt: "Use $gitea-issue-evidence to inspect supported attachments and return redacted evidence."

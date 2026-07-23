@@ -1,4 +1,0 @@
-interface:
-  display_name: "Gitea Issue Execution"
-  short_description: "Implement a Gitea-native marked plan"
-  default_prompt: "Use $gitea-issue-execution in Gitea-native mode to implement and verify the latest marked plan without committing or pushing."

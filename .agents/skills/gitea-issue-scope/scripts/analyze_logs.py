@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract, redact, and group high-signal failures from log attachments."""
+"""Extract, redact, and group high-signal failures from downloaded text logs."""
 
 from __future__ import annotations
 
@@ -75,7 +75,13 @@ def expand(paths: Iterable[Path]) -> list[Path]:
 def manifest_paths(path: Path) -> list[Path]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     root = path.resolve().parent
-    return [root / item["local_path"] for item in payload.get("attachments", []) if item.get("status") == "downloaded" and item.get("category") == "log" and item.get("local_path")]
+    return [
+        root / item["local_path"]
+        for item in payload.get("attachments", [])
+        if item.get("status") == "downloaded"
+        and item.get("category") == "log"
+        and item.get("local_path")
+    ]
 
 
 def severity(line: str) -> str | None:
@@ -97,23 +103,40 @@ def fingerprint(line: str) -> str:
     return hashlib.sha256(re.sub(r"\s+", " ", normalized).encode()).hexdigest()[:16]
 
 
-def analyze(path: Path, maximum: int, context_lines: int, max_findings: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def analyze(
+    path: Path, maximum: int, context_lines: int, max_findings: int
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     raw = path.read_bytes()
     text, encoding = decode(raw[:maximum])
     lines = text.splitlines()
-    metadata = {"path": str(path), "size": len(raw), "bytes_analyzed": min(len(raw), maximum), "encoding": encoding, "truncated": len(raw) > maximum, "line_count_analyzed": len(lines)}
+    metadata = {
+        "path": str(path),
+        "size": len(raw),
+        "bytes_analyzed": min(len(raw), maximum),
+        "encoding": encoding,
+        "truncated": len(raw) > maximum,
+        "line_count_analyzed": len(lines),
+    }
     findings: list[dict[str, Any]] = []
     for index, line in enumerate(lines):
         level = severity(line)
         if not level:
             continue
-        start, end = max(0, index - context_lines), min(len(lines), index + context_lines + 1)
+        start = max(0, index - context_lines)
+        end = min(len(lines), index + context_lines + 1)
         match = EXCEPTION.search(line)
-        findings.append({
-            "fingerprint": fingerprint(line), "severity": level, "exception": match.group(1) if match else None,
-            "timestamp": timestamp(line), "path": str(path), "line": index + 1,
-            "message": redact(line.strip())[:2000], "context": [redact(item)[:2000] for item in lines[start:end]],
-        })
+        findings.append(
+            {
+                "fingerprint": fingerprint(line),
+                "severity": level,
+                "exception": match.group(1) if match else None,
+                "timestamp": timestamp(line),
+                "path": str(path),
+                "line": index + 1,
+                "message": redact(line.strip())[:2000],
+                "context": [redact(item)[:2000] for item in lines[start:end]],
+            }
+        )
         if len(findings) >= max_findings:
             metadata["findings_truncated"] = True
             break
@@ -125,13 +148,22 @@ def grouped(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for finding in findings:
         key = finding["fingerprint"]
         if key not in result:
-            result[key] = {**finding, "count": 1, "occurrences": [{"path": finding["path"], "line": finding["line"]}]}
+            result[key] = {
+                **finding,
+                "count": 1,
+                "occurrences": [{"path": finding["path"], "line": finding["line"]}],
+            }
         else:
             result[key]["count"] += 1
             if len(result[key]["occurrences"]) < 10:
-                result[key]["occurrences"].append({"path": finding["path"], "line": finding["line"]})
+                result[key]["occurrences"].append(
+                    {"path": finding["path"], "line": finding["line"]}
+                )
     rank = {"fatal": 0, "error": 1, "warning": 2}
-    return sorted(result.values(), key=lambda item: (rank[item["severity"]], -item["count"], item["path"], item["line"]))
+    return sorted(
+        result.values(),
+        key=lambda item: (rank[item["severity"]], -item["count"], item["path"], item["line"]),
+    )
 
 
 def main() -> int:
@@ -157,19 +189,33 @@ def main() -> int:
     errors: list[dict[str, str]] = []
     for path in files:
         try:
-            metadata, extracted = analyze(path, args.max_bytes, args.context_lines, args.max_findings)
+            metadata, extracted = analyze(
+                path, args.max_bytes, args.context_lines, args.max_findings
+            )
             file_reports.append(metadata)
             findings.extend(extracted)
         except OSError as exc:
             errors.append({"path": str(path), "error": str(exc)})
     counts = Counter(item["severity"] for item in findings)
     report = {
-        "schema_version": 2, "analyzed_at": datetime.now(timezone.utc).isoformat(),
-        "summary": {"files": len(file_reports), "raw_findings": len(findings), "grouped_findings": len({item["fingerprint"] for item in findings}), "severity_counts": dict(counts), "truncated_files": sum(1 for item in file_reports if item["truncated"]), "errors": len(errors)},
-        "files": file_reports, "findings": grouped(findings), "errors": errors,
+        "schema_version": 2,
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
+        "summary": {
+            "files": len(file_reports),
+            "raw_findings": len(findings),
+            "grouped_findings": len({item["fingerprint"] for item in findings}),
+            "severity_counts": dict(counts),
+            "truncated_files": sum(1 for item in file_reports if item["truncated"]),
+            "errors": len(errors),
+        },
+        "files": file_reports,
+        "findings": grouped(findings),
+        "errors": errors,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    args.output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(args.output)
     return 0 if not errors else 3
 

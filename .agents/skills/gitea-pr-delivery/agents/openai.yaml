@@ -1,4 +1,0 @@
-interface:
-  display_name: "Gitea PR Delivery"
-  short_description: "Create concise verified Gitea PRs"
-  default_prompt: "Use $gitea-pr-delivery to create or update a verified PR from the pushed issue branch."

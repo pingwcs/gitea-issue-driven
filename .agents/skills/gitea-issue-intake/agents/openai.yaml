@@ -1,4 +1,0 @@
-interface:
-  display_name: "Gitea Issue Intake"
-  short_description: "Read issues into immutable evidence packets"
-  default_prompt: "Use $gitea-issue-intake to read this Gitea issue into a compact verified IssuePacket without remote writes."
