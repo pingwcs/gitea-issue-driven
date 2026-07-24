@@ -26,7 +26,7 @@ Do not edit product code, tests, planning artifacts, or unrelated files.
 
 ## Authorize remote publication
 
-Before any push or pull-request create/update, ask only whether the user permits automatic push and PR creation or update. Treat an explicit instruction to “自动操作PR” as authorization for the already scoped branches in the current task, including required pushes. Do not reuse authorization across tasks or unscoped branches.
+Before any push or pull-request create/update, ask only whether the user permits automatic push and PR creation or update. Treat an explicit instruction to “Automate PR options” as authorization for the already scoped branches in the current task, including required pushes. Do not reuse authorization across tasks or unscoped branches.
 
 If authorization is absent, stop after local branch and commit work. Authorization never includes merge, force-push, branch deletion, history rewriting, credential changes, or direct issue closure.
 

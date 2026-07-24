@@ -17,7 +17,7 @@ Create feature branches, never child issues.
 5. Invoke `$gitea-branch-scope` to resolve and fetch the remote default branch. Plan every new local branch ref from the same verified base. Do not switch branches, create worktrees, edit files, commit, or push.
 6. Present the final feature list and ask:
 
-   `是否确认按以上边界创建全部本地 feature branches，并在原 issue 发布对应的 branch 名与 feature 边界 comments？`
+   `Confirm whether to create all local feature branches according to the boundaries above, and post the corresponding branch names and feature boundary comments in the original issue?`
 
 7. Proceed only after explicit confirmation. A dirty worktree is allowed because ref creation must not touch files or the index; report it.
 8. Create every confirmed branch ref. For an existing name, verify its base and semantic boundary without overwriting or renaming it.
